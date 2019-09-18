@@ -1,0 +1,8 @@
+main: net.immortalmc.hoppers.ImmortalHoppers
+name: ImmortalHoppers
+version: 1.0
+
+commands:
+  ihoppers:
+    description: Main plugin command
+    usage: /<command>
