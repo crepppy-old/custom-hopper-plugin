@@ -4,12 +4,15 @@ import net.immortalmc.hoppers.Hopper;
 import net.immortalmc.hoppers.ImmortalHoppers;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SQLUtil {
     private static SQLUtil instance = new SQLUtil();
@@ -36,7 +39,7 @@ public class SQLUtil {
     public static void load() {
         try {
             connection
-                    .prepareStatement("CREATE TABLE IF NOT EXISTS `immortalhoppers` (`location` VARCHAR(50) NOT NULL, `level` TINYINT(5) NOT NULL, `special` VARCHAR(50) NOT NULL);")
+                    .prepareStatement("CREATE TABLE IF NOT EXISTS `immortalhoppers` (`location` VARCHAR(50) NOT NULL, `level` TINYINT(5) NOT NULL, `special` VARCHAR(50) NOT NULL, `inventory` VARCHAR(50) NULL, `blacklist` VARCHAR(50) NULL);")
                     .executeUpdate();
             ResultSet rs = connection.prepareStatement("SELECT * FROM immortalhoppers").executeQuery();
             while (rs.next()) {
@@ -44,8 +47,20 @@ public class SQLUtil {
                 int x = Integer.parseInt(rs.getString("location").split(":")[1].trim());
                 int y = Integer.parseInt(rs.getString("location").split(":")[2].trim());
                 int z = Integer.parseInt(rs.getString("location").split(":")[3].trim());
+                Location inventory = null;
+                if (rs.getObject("inventory") != null) {
+                    String inventoryWorld = rs.getString("inventory").split(":")[0].trim();
+                    int inventoryX = Integer.parseInt(rs.getString("inventory").split(":")[1].trim());
+                    int inventoryY = Integer.parseInt(rs.getString("inventory").split(":")[2].trim());
+                    int inventoryZ = Integer.parseInt(rs.getString("inventory").split(":")[3].trim());
+                    inventory = new Location(Bukkit.getWorld(inventoryWorld), inventoryX, inventoryY, inventoryZ);
+                }
+
+                List<Material> blacklist = rs.getObject("blacklist") == null ? null : Arrays.stream(rs.getString("blacklist").split(",")).map(i -> Material.matchMaterial(i)).collect(Collectors.toList());
+
                 ImmortalHoppers.getInstance().getHoppers()
-                        .add(new Hopper(new Location(Bukkit.getWorld(world), x, y, z), rs.getInt("level"), null, rs.getString("special")));
+                        .add(new Hopper(new Location(Bukkit.getWorld(world), x, y, z), rs.getInt("level"), rs.getString("special"), blacklist, inventory));
+                //todo update location
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -63,9 +78,23 @@ public class SQLUtil {
                 int y = h.getLocation().getBlockY();
                 int z = h.getLocation().getBlockZ();
                 String location = world + ":" + x + ":" + y + ":" + z;
+
+                String iLocation = "null";
+                if (h.getCustomInventory() != null) {
+                    String iWorld = h.getCustomInventory().getWorld().getName();
+                    int iX = h.getCustomInventory().getBlockX();
+                    int iY = h.getCustomInventory().getBlockY();
+                    int iZ = h.getCustomInventory().getBlockZ();
+                    iLocation = "'" + iWorld + ":" + iX + ":" + iY + ":" + iZ + "'";
+                }
+                String blacklist = "null";
+                if (h.getBlacklist() != null) {
+                    blacklist = "'" + h.getBlacklist().stream().map(b -> b.toString() + ", ").collect(Collectors.joining("")) + "'";
+                }
+
                 //Insert the hopper values into the table
                 connection
-                        .prepareStatement("INSERT INTO immortalhoppers(location, level, special) VALUES('" + location + "', " + h.getLevel().getNumber() + ", '" + h.getSpecial() + "');")
+                        .prepareStatement("INSERT INTO immortalhoppers(location, level, special, inventory, blacklist) VALUES('" + location + "', " + h.getLevel().getNumber() + ", '" + h.getSpecial() + "', " + iLocation + ", " + blacklist + ");")
                         .executeUpdate();
             }
         } catch (Exception e) {

@@ -12,19 +12,21 @@ import org.bukkit.event.block.BlockPlaceEvent;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class BlockPlaceListener implements Listener {
     @EventHandler
     public void onPlayerPlaceBlock(BlockPlaceEvent e) {
-        if (e.getItemInHand().getType() != Material.HOPPER) return;
+        if (e.getItemInHand().getType() != Material.HOPPER) {
+            return;
+        }
         //Adds placed hoppers to the array
-        if (e.getItemInHand().equals(ItemManager.cropHopper) || e.getItemInHand().equals(ItemManager.mobHopper))
+        if (e.getItemInHand().equals(ItemManager.cropHopper) || e.getItemInHand().equals(ItemManager.mobHopper)) {
             ImmortalHoppers.getInstance().getHoppers()
-                    .add(new Hopper(e.getBlock().getLocation(), -1, null, ChatColor.stripColor(e.getItemInHand().getItemMeta().getDisplayName()).split(" ")[0]));
-        else
+                    .add(new Hopper(e.getBlock().getLocation(), -1, ChatColor.stripColor(e.getItemInHand().getItemMeta().getDisplayName()).split(" ")[0], null, null));
+        } else {
             ImmortalHoppers.getInstance().getHoppers()
                     .add(new Hopper(e.getBlock().getLocation(), 1, null));
+        }
     }
 
     @EventHandler

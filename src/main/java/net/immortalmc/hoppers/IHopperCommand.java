@@ -12,7 +12,9 @@ import org.bukkit.inventory.ItemStack;
 public class IHopperCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (!(sender instanceof Player)) return true;
+        if (!(sender instanceof Player)) {
+            return true;
+        }
         //If not otherwise stated, set the target as the player
         Player target, p;
         target = p = (Player) sender;
@@ -33,7 +35,7 @@ public class IHopperCommand implements CommandExecutor {
             }
         } else {
             //Full Command: ihoppers crepppy mob 1
-            target = Bukkit.getOnlinePlayers().stream().filter(x -> ((Player) x).getName().equalsIgnoreCase(args[0])).findAny().orElse(null);
+            target = Bukkit.getOnlinePlayers().stream().filter(x -> x.getName().equalsIgnoreCase(args[0])).findAny().orElse(null);
             if (args[1].equalsIgnoreCase("mob")) {
                 item = ItemManager.mobHopper;
             } else if (args[1].equalsIgnoreCase("crop")) {
@@ -42,11 +44,11 @@ public class IHopperCommand implements CommandExecutor {
                 prefixedMessage(p, "&cIncorrect hopper type: mob, crop");
                 return true;
             }
-            if(target == null) {
+            if (target == null) {
                 prefixedMessage(p, ChatColor.RED + "Please specify an online player");
                 return true;
             } else {
-                if(args.length > 2) {
+                if (args.length > 2) {
                     item.setAmount(Integer.parseInt(args[2]));
                 }
             }

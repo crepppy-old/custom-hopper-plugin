@@ -10,7 +10,9 @@ import org.bukkit.event.inventory.InventoryType;
 public class HopperMoveItemEvent implements Listener {
     @EventHandler
     public void onInventoryMove(InventoryMoveItemEvent e) {
-        if (e.getSource().getType() != InventoryType.HOPPER) return;
+        if (e.getSource().getType() != InventoryType.HOPPER) {
+            return;
+        }
         //Disable the vanilla hopper functionality
         e.setCancelled(true);
         Hopper block = (Hopper) e.getSource().getHolder();

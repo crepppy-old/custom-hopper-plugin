@@ -21,6 +21,11 @@ public class ItemGenerator {
         this.meta = item.getItemMeta();
     }
 
+    public ItemGenerator(ItemStack item) {
+        this.item = item;
+        this.meta = item.getItemMeta();
+    }
+
     public ItemGenerator setName(String name) {
         meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
         return this;
@@ -36,6 +41,11 @@ public class ItemGenerator {
                 .map(x -> ChatColor.RESET + "" + ChatColor.GRAY + ChatColor.translateAlternateColorCodes('&', x))
                 .collect(Collectors
                         .toList()));
+        return this;
+    }
+
+    public ItemGenerator setDurability(int data) {
+        item.setDurability((short) data);
         return this;
     }
 

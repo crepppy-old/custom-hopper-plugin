@@ -20,11 +20,11 @@ upgrades:
 
 
 ##Use https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html for item names
-crops:
+crop:
   - WHEAT
   - SEEDS
 
-monsters:
+monster:
   - ROTTEN_FLESH
   - BONE
   - ARROW
