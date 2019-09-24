@@ -10,9 +10,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class BlockPlaceListener implements Listener {
     @EventHandler
     public void onPlayerPlaceBlock(BlockPlaceEvent e) {
@@ -22,10 +19,10 @@ public class BlockPlaceListener implements Listener {
         //Adds placed hoppers to the array
         if (e.getItemInHand().equals(ItemManager.cropHopper) || e.getItemInHand().equals(ItemManager.mobHopper)) {
             ImmortalHoppers.getInstance().getHoppers()
-                    .add(new Hopper(e.getBlock().getLocation(), -1, ChatColor.stripColor(e.getItemInHand().getItemMeta().getDisplayName()).split(" ")[0], null, null));
+                    .put(e.getBlockPlaced().getLocation(), new Hopper(e.getBlockPlaced().getLocation(), -1, ChatColor.stripColor(e.getItemInHand().getItemMeta().getDisplayName()).split(" ")[0], null, null));
         } else {
             ImmortalHoppers.getInstance().getHoppers()
-                    .add(new Hopper(e.getBlock().getLocation(), 1, null));
+                    .put(e.getBlockPlaced().getLocation(), new Hopper(e.getBlockPlaced().getLocation(), 1, null));
         }
     }
 
@@ -33,11 +30,7 @@ public class BlockPlaceListener implements Listener {
     public void onPlayerBreakBlock(BlockBreakEvent e) {
         //Removes saved hoppers from the array
         if (e.getBlock().getType() == Material.HOPPER) {
-            List<Hopper> toRemove = new ArrayList<>();
-            ImmortalHoppers.getInstance().getHoppers().stream()
-                    .filter(x -> x == null || x.getLocation().equals(e.getBlock().getLocation()))
-                    .forEach(toRemove::add);
-            ImmortalHoppers.getInstance().getHoppers().removeAll(toRemove);
+            ImmortalHoppers.getInstance().getHoppers().remove(e.getBlock().getLocation());
         }
     }
 }

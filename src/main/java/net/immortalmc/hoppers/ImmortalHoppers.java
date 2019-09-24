@@ -12,10 +12,8 @@ import org.bukkit.Material;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 public class ImmortalHoppers extends JavaPlugin {
     private static ImmortalHoppers instance;

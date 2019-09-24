@@ -57,9 +57,9 @@ public class SQLUtil {
                 }
 
                 List<Material> blacklist = rs.getObject("blacklist") == null ? null : Arrays.stream(rs.getString("blacklist").split(",")).map(i -> Material.matchMaterial(i)).collect(Collectors.toList());
-
+                Location location = new Location(Bukkit.getWorld(world), x, y, z);
                 ImmortalHoppers.getInstance().getHoppers()
-                        .add(new Hopper(new Location(Bukkit.getWorld(world), x, y, z), rs.getInt("level"), rs.getString("special"), blacklist, inventory));
+                        .put(location, new Hopper(location, rs.getInt("level"), rs.getString("special"), blacklist, inventory));
                 //todo update location
             }
         } catch (SQLException e) {
@@ -72,7 +72,7 @@ public class SQLUtil {
             connection
                     .prepareStatement("DELETE FROM immortalhoppers;")
                     .executeUpdate();
-            for (Hopper h : ImmortalHoppers.getInstance().getHoppers()) {
+            for (Hopper h : ImmortalHoppers.getInstance().getHoppers().values()) {
                 String world = h.getLocation().getWorld().getName();
                 int x = h.getLocation().getBlockX();
                 int y = h.getLocation().getBlockY();

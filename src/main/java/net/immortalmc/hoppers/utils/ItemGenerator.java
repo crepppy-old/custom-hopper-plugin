@@ -27,7 +27,7 @@ public class ItemGenerator {
     }
 
     public ItemGenerator setName(String name) {
-        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
+        meta.setDisplayName(ChatColor.RESET + ChatColor.translateAlternateColorCodes('&', name));
         return this;
     }
 

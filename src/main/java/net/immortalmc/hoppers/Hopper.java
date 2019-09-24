@@ -7,6 +7,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -26,6 +27,7 @@ public class Hopper {
         this.level = Level.getLevel(level);
         this.special = "";
         this.hopper = (org.bukkit.block.Hopper) location.getBlock().getState();
+        this.blacklist = new ArrayList<>();
         this.inventory = inventory;
     }
 
@@ -50,31 +52,33 @@ public class Hopper {
     public void tick() {
         InventoryHolder inventory = this.customInventory == null ? this.inventory : (InventoryHolder) this.customInventory.getBlock().getState();
         try {
-            if (inventory != null && hopper.getInventory().getContents() != null) {
-                //Get the contents of the hopper, removing null values
-                List<ItemStack> contents = Arrays.stream(hopper.getInventory().getContents()).filter(Objects::nonNull).collect(Collectors.toList());
-                if (contents.size() == 0) {
-                    return;
+            if (inventory != null) {
+                if (hopper.getInventory().getContents() != null) {
+                    //Get the contents of the hopper, removing null values
+                    List<ItemStack> contents = Arrays.stream(hopper.getInventory().getContents()).filter(Objects::nonNull).collect(Collectors.toList());
+                    if (contents.size() == 0) {
+                        return;
+                    }
+                    //Get the 1 of the first item in the hopper and places it into the target inventory
+                    ItemStack item = contents.get(0).clone();
+                    //Remove blacklisted items
+                    if (blacklist != null && blacklist.contains(item.getType())) {
+                        hopper.getLocation().getWorld().dropItem(hopper.getLocation().add(0, 1, 0), item);
+                        return;
+                    }
+                    contents.get(0).setAmount(item.getAmount() - 1);
+                    item.setAmount(1);
+                    inventory.getInventory().addItem(item);
+                    //Replace the current inventory of the hopper, with the new one that doesn't have null values
+                    //  and has 1 less item
+                    hopper.getInventory().clear();
+                    hopper.getInventory().addItem(contents.toArray(ItemStack[]::new));
                 }
-                //Get the 1 of the first item in the hopper and places it into the target inventory
-                ItemStack item = contents.get(0).clone();
-                //Remove blacklisted items
-                if (blacklist != null && blacklist.contains(item.getType())) {
-                    hopper.getLocation().getWorld().dropItem(hopper.getLocation().add(0, 1, 0), item);
-                    return;
-                }
-                contents.get(0).setAmount(item.getAmount() - 1);
-                item.setAmount(1);
-                inventory.getInventory().addItem(item);
-                //Replace the current inventory of the hopper, with the new one that doesn't have null values
-                //  and has 1 less item
-                hopper.getInventory().clear();
-                hopper.getInventory().addItem(contents.toArray(ItemStack[]::new));
-
                 //If the hopper is a special hopper loop through dropped items in the same chunk
                 //If an item is compatible with the hopper
                 //Add the item to the hopper and remove from the ground
                 System.out.println("special = " + special);
+                System.out.println("level = " + level);
                 if (level == Level.SPECIAL) {
                     Arrays.stream(hopper.getChunk().getEntities()).filter(x -> x.getType() == EntityType.DROPPED_ITEM).filter(x -> ImmortalHoppers.getInstance().getConfig().getStringList(special).contains(((Item) x).getItemStack().getType().toString())).forEach(x -> {
                         Item droppedItem = (Item) x;
@@ -155,7 +159,7 @@ public class Hopper {
 
         public double getPrice() {
             //Gets price of upgrade from config
-            return ImmortalHoppers.getInstance().getConfig().getDouble("upgrades." + number + ".price");
+            return ImmortalHoppers.getInstance().getConfig().getDouble("upgrades." + this.toString().toUpperCase() + ".price");
         }
     }
 }
