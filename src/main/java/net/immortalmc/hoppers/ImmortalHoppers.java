@@ -1,14 +1,12 @@
 package net.immortalmc.hoppers;
 
-import net.immortalmc.hoppers.listeners.BlockPlaceListener;
-import net.immortalmc.hoppers.listeners.HopperInteractEvent;
-import net.immortalmc.hoppers.listeners.HopperMoveItemEvent;
-import net.immortalmc.hoppers.listeners.InventoryListener;
+import net.immortalmc.hoppers.listeners.*;
 import net.immortalmc.hoppers.utils.SQLUtil;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -19,22 +17,29 @@ public class ImmortalHoppers extends JavaPlugin {
     private static ImmortalHoppers instance;
     private HashMap<Location, Hopper> hoppers;
     private Economy econ;
+    private HashMap<Player, Hopper> customInventoryMode;
 
     public static ImmortalHoppers getInstance() {
         return instance;
     }
 
+    public HashMap<Player, Hopper> getCustomInventoryMode() {
+        return customInventoryMode;
+    }
+
     @Override
     public void onEnable() {
         //Register events are assign variables
-        //TODO vault integration for upgrades - crepppy 18/09
         instance = this;
         hoppers = new HashMap<>();
+        customInventoryMode = new HashMap<>();
         getConfig().options().copyDefaults(true);
         saveConfig();
+        //Register commands and events
         Bukkit.getPluginCommand("ihoppers").setExecutor(new IHopperCommand());
         Bukkit.getPluginManager().registerEvents(new BlockPlaceListener(), this);
         Bukkit.getPluginManager().registerEvents(new HopperInteractEvent(), this);
+        Bukkit.getPluginManager().registerEvents(new HopperPickupItemListener(), this);
         Bukkit.getPluginManager().registerEvents(new HopperMoveItemEvent(), this);
         Bukkit.getPluginManager().registerEvents(new InventoryListener(), this);
         //Vault economy hook

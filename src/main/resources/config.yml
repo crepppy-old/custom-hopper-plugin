@@ -1,22 +1,32 @@
+##Please make sure all item types are in ALL CAPITALS
 upgrades:
   ONE:
     speed: 8
     price: 50
+    blacklist: 0
   TWO:
     speed: 5
     price: 100
+    blacklist: 1
   THREE:
     speed: 4
     price: 250
+    blacklist: 2
   FOUR:
     speed: 3
     price: 600
+    blacklist: 3
   FIVE:
     speed: 2
     price: 1600
+    blacklist: 5
   SPECIAL:
     speed: 4
     price: -1
+    blacklist: 3
+
+blacklist:
+  - BARRIER
 
 
 ##Use https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html for item names
@@ -24,7 +34,7 @@ crop:
   - WHEAT
   - SEEDS
 
-monster:
+mob:
   - ROTTEN_FLESH
   - BONE
   - ARROW

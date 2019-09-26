@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,7 +40,7 @@ public class SQLUtil {
     public static void load() {
         try {
             connection
-                    .prepareStatement("CREATE TABLE IF NOT EXISTS `immortalhoppers` (`location` VARCHAR(50) NOT NULL, `level` TINYINT(5) NOT NULL, `special` VARCHAR(50) NOT NULL, `inventory` VARCHAR(50) NULL, `blacklist` VARCHAR(50) NULL);")
+                    .prepareStatement("CREATE TABLE IF NOT EXISTS `immortalhoppers` (`location` VARCHAR(50) NOT NULL PRIMARY KEY, `level` INT NOT NULL, `special` VARCHAR(50) NOT NULL, `inventory` VARCHAR(50) NULL, `blacklist` VARCHAR(100) NULL);")
                     .executeUpdate();
             ResultSet rs = connection.prepareStatement("SELECT * FROM immortalhoppers").executeQuery();
             while (rs.next()) {
@@ -47,6 +48,7 @@ public class SQLUtil {
                 int x = Integer.parseInt(rs.getString("location").split(":")[1].trim());
                 int y = Integer.parseInt(rs.getString("location").split(":")[2].trim());
                 int z = Integer.parseInt(rs.getString("location").split(":")[3].trim());
+                Location location = new Location(Bukkit.getWorld(world), x, y, z);
                 Location inventory = null;
                 if (rs.getObject("inventory") != null) {
                     String inventoryWorld = rs.getString("inventory").split(":")[0].trim();
@@ -56,11 +58,10 @@ public class SQLUtil {
                     inventory = new Location(Bukkit.getWorld(inventoryWorld), inventoryX, inventoryY, inventoryZ);
                 }
 
-                List<Material> blacklist = rs.getObject("blacklist") == null ? null : Arrays.stream(rs.getString("blacklist").split(",")).map(i -> Material.matchMaterial(i)).collect(Collectors.toList());
-                Location location = new Location(Bukkit.getWorld(world), x, y, z);
+                List<Material> blacklist = rs.getObject("blacklist") == null ? new ArrayList<>() : Arrays.stream(rs.getString("blacklist").split(",")).map(Material::matchMaterial).collect(Collectors.toList());
                 ImmortalHoppers.getInstance().getHoppers()
                         .put(location, new Hopper(location, rs.getInt("level"), rs.getString("special"), blacklist, inventory));
-                //todo update location
+
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -69,9 +70,6 @@ public class SQLUtil {
 
     public static void save() {
         try {
-            connection
-                    .prepareStatement("DELETE FROM immortalhoppers;")
-                    .executeUpdate();
             for (Hopper h : ImmortalHoppers.getInstance().getHoppers().values()) {
                 String world = h.getLocation().getWorld().getName();
                 int x = h.getLocation().getBlockX();
@@ -94,7 +92,7 @@ public class SQLUtil {
 
                 //Insert the hopper values into the table
                 connection
-                        .prepareStatement("INSERT INTO immortalhoppers(location, level, special, inventory, blacklist) VALUES('" + location + "', " + h.getLevel().getNumber() + ", '" + h.getSpecial() + "', " + iLocation + ", " + blacklist + ");")
+                        .prepareStatement("REPLACE INTO immortalhoppers(location, level, special, inventory, blacklist) VALUES('" + location + "', " + h.getLevel().getNumber() + ", '" + h.getSpecial() + "', " + iLocation + ", " + blacklist + ");")
                         .executeUpdate();
             }
         } catch (Exception e) {

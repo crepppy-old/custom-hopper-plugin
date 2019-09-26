@@ -10,6 +10,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class IHopperCommand implements CommandExecutor {
+    public static void prefixedMessage(Player p, String message) {
+        p.sendMessage(ChatColor.translateAlternateColorCodes('&', "&e&lImmortalMC &8» " + message));
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (!(sender instanceof Player)) {
@@ -55,9 +59,5 @@ public class IHopperCommand implements CommandExecutor {
         }
         target.getInventory().addItem(item);
         return true;
-    }
-
-    private void prefixedMessage(Player p, String message) {
-        p.sendMessage(ChatColor.translateAlternateColorCodes('&', "&e&lImmortalMC &8» " + message));
     }
 }
